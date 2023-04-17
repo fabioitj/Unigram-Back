@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import users from "./userRoutes.js"
+import publications from "./publicationRoutes.js";
+import comments from "./commentRoutes.js";
 
 
 const routes = (app) => {
@@ -9,7 +11,9 @@ const routes = (app) => {
         cors({
             origin: 'http://localhost:3001',
         }),
-        users
+        users,
+        publications,
+        comments,
     );
 
 }

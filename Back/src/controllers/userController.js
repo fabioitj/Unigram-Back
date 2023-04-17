@@ -4,6 +4,22 @@ import users from "../models/User.js";
 
 class UserController {
     
+    static login = (req, res) => {
+        const { body } = req;
+
+        users.findOne({
+            email: body.email,
+            password: body.password
+        }, (err, user) => {
+            if(err) {
+                res.status(500).send({message: err});
+            }
+            else {
+                res.status(200).send(user);
+            }
+        })
+    }
+
     static get_users = (req, res) => {
         users.find((err, user_list) => {
             if(err) {
