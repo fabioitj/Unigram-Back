@@ -28,10 +28,15 @@ class PublicationController {
         publications
             .populate(
                 publication_list, 
-                {
-                    path: 'id_user', 
-                    select: ['name', 'username', 'email', 'birth_date']
-                },
+                [
+                    {
+                        path: 'id_user', 
+                        select: ['name', 'username', 'email', 'birth_date']
+                    },
+                    {
+                        path: 'likes'
+                    }
+                ],
                 (err, result) => {
                     if(err) {
                         res.status(500).send({message: err});
@@ -39,7 +44,7 @@ class PublicationController {
                         res.status(200).send(result);
                     }
                 }
-            )
+            );
     }
 
     static get_publication_by_id = async (req, res) => {
@@ -119,6 +124,53 @@ class PublicationController {
             }
         })
     }
+
+    static like_publication = async (req, res) => {
+        const {id} = req.params;
+        const {id_user} = req.body;
+
+        const publication = await publications.findById(id);
+        const already_liked = publication.likes.includes(new mongoose.Types.ObjectId(id_user));
+        if(already_liked) {
+            res.status(500).send({message: "Already liked the publication."});
+            return;
+        }
+
+        const current = await current_likes_in_publication(id);
+        const new_likes = [...(current.filter(c => c != null)), id_user];
+
+        publications.findByIdAndUpdate(id, { likes: new_likes }, (err) => {
+            if(err) {
+                res.status(500).send({message: err});
+            }
+            else {
+                res.status(200).send({id_user});
+            }
+        });
+    }
+
+    static unlike_publication = async (req, res) => {
+        const {id} = req.params;
+        const {id_user} = req.body;
+
+        const current = await current_likes_in_publication(id);
+        const new_likes = [...(current.filter(c => c != null && c != id_user))];
+
+        publications.findByIdAndUpdate(id, { likes: new_likes }, (err) => {
+            if(err) {
+                res.status(500).send({message: err});
+            }
+            else {
+                res.status(200).send({id_user});
+            }
+        });
+    }
+
+}
+
+const current_likes_in_publication = async (id) => {
+    const publication = await publications.findById(id, 'likes');
+    return publication.likes;
 }
 
 export default PublicationController;

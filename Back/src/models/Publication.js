@@ -6,6 +6,7 @@ const publicationSchema = mongoose.Schema(
         description: {type: String, required: true},
         image: {type: String, required: true},
         publication_date: {type: String, required: true},
+        likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'users' }],
         id_user: {type: mongoose.Schema.Types.ObjectId, required: true, ref: 'users'},
     },
     {

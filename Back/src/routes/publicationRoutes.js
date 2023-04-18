@@ -8,6 +8,8 @@ router
     .get("/publication/:id", PublicationController.get_publication_by_id)
     .post("/publication", PublicationController.create_publication)
     .put("/publication/:id", PublicationController.update_publication)
+    .put("/publication/like/:id", PublicationController.like_publication)
+    .put("/publication/unlike/:id", PublicationController.unlike_publication)
     .delete("/publication/:id", PublicationController.delete_publication);
 
 export default router;
