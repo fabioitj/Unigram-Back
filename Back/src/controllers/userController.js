@@ -11,8 +11,8 @@ class UserController {
             email: body.email,
             password: body.password
         }, (err, user) => {
-            if(err) {
-                res.status(500).send({message: err});
+            if(err || !user) {
+                res.status(500).send({message: "Suas credenciais estão incorretas."});
             }
             else {
                 res.status(200).send(user);

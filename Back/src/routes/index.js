@@ -9,7 +9,7 @@ const routes = (app) => {
     app.use(
         express.json(),
         cors({
-            origin: 'http://localhost:3001',
+            origin: 'http://localhost:19006',
         }),
         users,
         publications,

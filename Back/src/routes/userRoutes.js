@@ -7,6 +7,7 @@ router
     .get("/user", UserController.get_users)
     .get("/user/:id", UserController.get_user_by_id)
     .post("/user", UserController.create_user)
+    .post("/login", UserController.login)
     .put("/user/:id", UserController.update_user)
     .put("/user/follow/:id", await UserController.follow_user)
     .put("/user/unfollow/:id", await UserController.unfollow_user)
