@@ -3,6 +3,8 @@ import cors from "cors";
 import users from "./userRoutes.js"
 import publications from "./publicationRoutes.js";
 import comments from "./commentRoutes.js";
+import connections from "./connectionRoutes.js";
+import messages from "./messageRoutes.js";
 
 
 const routes = (app) => {
@@ -14,6 +16,8 @@ const routes = (app) => {
         users,
         publications,
         comments,
+        connections,
+        messages
     );
 
 }

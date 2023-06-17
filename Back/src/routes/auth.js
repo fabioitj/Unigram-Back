@@ -1,6 +1,15 @@
 import SECRET from "../../secret.js";
 import jwt from "jsonwebtoken";
 
+const getUserByToken = (req) => {
+    const authHeader = req.headers['authorization'];
+
+    const token = authHeader && authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(token, SECRET);
+    return decoded.id;
+}
+
 const checkToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
 
@@ -31,4 +40,4 @@ const generateToken = (id) => {
     );
 }
 
-export { checkToken, generateToken };
+export { checkToken, generateToken, getUserByToken };

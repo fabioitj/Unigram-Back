@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import users from "../models/User.js";
+import { generateToken, getUserByToken } from "../routes/auth.js";
 
 
 class UserController {
@@ -15,7 +16,9 @@ class UserController {
                 res.status(500).send({message: "Suas credenciais estão incorretas."});
             }
             else {
-                res.status(200).send(user);
+                const token = generateToken(user._id);
+
+                res.status(200).send({token, userId: user._id, email: user.email});
             }
         })
     }
@@ -29,6 +32,19 @@ class UserController {
                 res.status(200).send(user_list);
             }
         })
+    }
+
+    static get_users_by_search = (req, res) => {
+        const { search } = req.body;
+
+        users.find({
+            'name': { $regex: '.*' + search + '.*' }
+        }, (err, users) => {
+            if(err)
+                res.status(500).send({message: err});
+            else
+                res.status(200).send(users);
+        });
     }
 
     static get_user_by_id = (req, res) => {
@@ -60,7 +76,7 @@ class UserController {
 
     static update_user = (req, res) => {
         const {body} = req;
-        const {id} = req.params;
+        const id = getUserByToken(req);
 
         users.findByIdAndUpdate(id, { $set: body }, (err) => {
             if(err) {
@@ -73,7 +89,7 @@ class UserController {
     }
 
     static delete_user = (req, res) => {
-        const {id} = req.params;
+        const id = getUserByToken(req);
 
         users.findByIdAndDelete(id, (err) => {
             if(err) {
@@ -84,59 +100,6 @@ class UserController {
             }
         })
     }
-
-    static follow_user = async (req, res) => {
-        const {id} = req.params;
-        const {follow} = req.body;
-
-        const user = await users.findById(id);
-        const already_follow = user.follows.includes(new mongoose.Types.ObjectId(follow));
-        if(already_follow) {
-            res.status(500).send({message: "You already follow this account."});
-            return;
-        }
-
-        const current = await current_follows(id);
-        const new_follows = [...current, follow];
-
-        users.findByIdAndUpdate(id, { follows: new_follows }, (err) => {
-            if(err) {
-                res.status(500).send({message: err});
-            }
-            else {
-                res.status(200).send({follow});
-            }
-        });
-    }
-
-    static unfollow_user = async (req, res) => {
-        const {id} = req.params;
-        const {follow} = req.body;
-
-        const user = await users.findById(id);
-        const dont_follow = !user.follows.includes(new mongoose.Types.ObjectId(follow));
-        if(dont_follow) {
-            res.status(500).send({message: "You don't follow this account."});
-            return;
-        }
-
-        const current = await current_follows(id);
-        current.splice(current.indexOf(follow), 1);
-
-        users.findByIdAndUpdate(id, { follows: current }, (err) => {
-            if(err) {
-                res.status(500).send({message: err});
-            }
-            else {
-                res.status(200).send({follow});
-            }
-        });
-    }
-}
-
-const current_follows = async (id) => {
-    const user = await users.findById(id, 'follows');
-    return user.follows;
 }
 
 export default UserController;

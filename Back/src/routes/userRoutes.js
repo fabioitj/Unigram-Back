@@ -1,16 +1,16 @@
 import express from "express";
 import UserController from "../controllers/userController.js";
+import { checkToken } from "./auth.js";
 
 const router = express.Router();
 
 router
     .get("/user", UserController.get_users)
-    .get("/user/:id", UserController.get_user_by_id)
+    .get("/user/search", checkToken, UserController.get_users_by_search)
+    .get("/user/:id", checkToken, UserController.get_user_by_id)
     .post("/user", UserController.create_user)
     .post("/login", UserController.login)
-    .put("/user/:id", UserController.update_user)
-    .put("/user/follow/:id", await UserController.follow_user)
-    .put("/user/unfollow/:id", await UserController.unfollow_user)
-    .delete("/aulas/:id", UserController.delete_user);
+    .put("/user", checkToken, UserController.update_user)
+    .delete("/user", checkToken, UserController.delete_user);
 
 export default router;

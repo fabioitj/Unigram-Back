@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import publications from "../models/Publication.js";
 import { request } from "express";
+import { getUserByToken } from "../routes/auth.js";
 
 
 class PublicationController {
@@ -78,7 +79,7 @@ class PublicationController {
                     if(err) {
                         res.status(500).send({message: err});
                     } else {
-                        res.status(200).send(result);
+                        res.status(200).send(result[0]);
                     }
                 }
             )
@@ -87,7 +88,13 @@ class PublicationController {
     static create_publication = (req, res) => {
         const {body} = req;
 
-        const new_publication = new publications(body);
+        const id_user = getUserByToken(req);
+
+        const new_publication = new publications({
+            ...body,
+            id_user
+        });
+
         new_publication.save((err) => {
             if(err) {
                 res.status(500).send({message: err});
@@ -127,7 +134,7 @@ class PublicationController {
 
     static like_publication = async (req, res) => {
         const {id} = req.params;
-        const {id_user} = req.body;
+        const id_user = getUserByToken(req);
 
         const publication = await publications.findById(id);
         const already_liked = publication.likes.includes(new mongoose.Types.ObjectId(id_user));
@@ -151,7 +158,7 @@ class PublicationController {
 
     static unlike_publication = async (req, res) => {
         const {id} = req.params;
-        const {id_user} = req.body;
+        const id_user = getUserByToken(req);
 
         const current = await current_likes_in_publication(id);
         const new_likes = [...(current.filter(c => c != null && c != id_user))];
