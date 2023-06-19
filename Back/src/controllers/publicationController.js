@@ -1,11 +1,54 @@
 import mongoose from "mongoose";
 import publications from "../models/Publication.js";
-import { request } from "express";
+import connections from "../models/Connection.js";
 import { getUserByToken } from "../routes/auth.js";
 
 
 class PublicationController {
     
+    static get_publications_feed = async (req, res) => {
+        const userId = getUserByToken(req);
+
+        connections.find({
+            $and: [
+                {
+                    $or: [
+                        { id_user_requester: userId },
+                        { id_user_requested: userId }
+                    ]
+                },
+                { status: 'A' }
+            ]
+        })
+        .select('id_user_requester id_user_requested')
+        .exec((err, connections) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: 'An error occurred' });
+            }
+
+            const connectedUserIds = connections.reduce((ids, connection) => {
+                if (connection.id_user_requester.toString() !== userId) {
+                    ids.push(connection.id_user_requester);
+                }
+                if (connection.id_user_requested.toString() !== userId) {
+                    ids.push(connection.id_user_requested);
+                }
+                return ids;
+            }, []);
+
+            publications.find({ id_user: { $in: connectedUserIds } })
+                .sort({ date_register: -1 })
+                .populate('id_user', ['_id', 'name', 'username', 'email', 'birth_date'])
+                .exec((err, publications) => {
+                    if (err)
+                        res.status(500).send({ error: 'An error occurred' });
+                    else
+                        res.status(200).send({ publications });
+                });
+        });
+    }
+
     static get_publications_by_user = async (req, res) => {
         const { id } = req.params;
 
@@ -180,4 +223,4 @@ const current_likes_in_publication = async (id) => {
     return publication.likes;
 }
 
-export default PublicationController;
+export default PublicationController; 
