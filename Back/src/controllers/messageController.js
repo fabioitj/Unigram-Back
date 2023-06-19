@@ -1,9 +1,86 @@
 import mongoose from "mongoose";
 import messages from "../models/Message.js";
+import connections from "../models/Connection.js";
 import { request } from "express";
 import { getUserByToken } from "../routes/auth.js";
+import users from "../models/User.js";
 
 class MessageController {
+
+    static get_all_conversations = async (req, res) => {
+
+        const userId = getUserByToken(req);
+
+        try {
+            // Find the connections of the user with status 'A'
+            const connectionsByUser = await connections.find({
+                $and: [
+                {
+                    $or: [
+                    { id_user_requester: userId },
+                    { id_user_requested: userId }
+                    ]
+                },
+                { status: 'A' }
+                ]
+            });
+        
+            // Extract the connected user IDs
+            const connectedUserIds = connectionsByUser.reduce((ids, connection) => {
+                if (connection.id_user_requester.toString() !== userId) {
+                ids.push(connection.id_user_requester);
+                }
+                if (connection.id_user_requested.toString() !== userId) {
+                ids.push(connection.id_user_requested);
+                }
+                return ids;
+            }, []);
+        
+            // Find the users with the last exchanged message
+            const usersWithLastMessages = await Promise.all(
+                connectedUserIds.map(async (connectedUserId) => {
+                    console.log({connectedUserId});
+
+                const lastMessage = await messages.findOne({
+                    $or: [
+                    { sender: userId, receiver: connectedUserId },
+                    { sender: connectedUserId, receiver: userId }
+                    ]
+                })
+                    .sort({ date_register: -1 })
+                    .limit(1)
+                    .populate('sender')
+                    .populate('receiver');
+                
+                if(!lastMessage)
+                    return;
+
+                const obj = {
+                    userId: connectedUserId,
+                    message: {
+                    _id: lastMessage?._id,
+                    body: lastMessage?.body,
+                    sender: lastMessage?.sender._id,
+                    receiver: lastMessage?.receiver._id,
+                    date_register: lastMessage?.date_register
+                    }
+                };
+
+                console.log(obj);
+
+                return obj;
+                })
+            );
+                
+
+
+            // Return the users with last messages
+            res.status(200).send(usersWithLastMessages.filter(_ => _ != null));
+            } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'An error occurred' });
+            }
+    }
 
     static get_messages = (req, res) => {
 
