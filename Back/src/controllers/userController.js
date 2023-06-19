@@ -39,7 +39,7 @@ class UserController {
 
         users.find({
             'name': { $regex: '.*' + search + '.*' }
-        }, (err, users) => {
+        }, ['_id', 'username', 'name'], (err, users) => {
             if(err)
                 res.status(500).send({message: err});
             else
