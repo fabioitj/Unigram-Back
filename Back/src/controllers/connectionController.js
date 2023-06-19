@@ -7,6 +7,34 @@ import { getUserByToken } from "../routes/auth.js";
 
 
 class ConnectionController {
+
+   static get_connections_by_logged_user = (req, res) => {
+      const id = getUserByToken(req);
+
+      connections.find({
+         $and: [
+            {
+               $or: [
+                  { id_user_requester: id },
+                  { id_user_requested: id },
+               ],
+            },
+            { status: 'A' }
+         ]
+      })
+      .populate('id_user_requester',)
+      .populate('id_user_requested')
+      .exec((err, connections) => {
+         if(err)
+            res.status(500).send({message: err.message});
+         else
+         {
+            res.status(200).send(connections);
+         }
+            
+      });
+   }
+
    static get_connections_by_user = (req, res) => {
       const {id} = req.params;
 
@@ -63,7 +91,7 @@ class ConnectionController {
    static accept_connection = (req, res) => {
       const {id_connection} = req.body;
 
-      connections.findOneAndUpdate(id_connection, { status: STATUS_CONNECTION.ACCEPTED }, (err) => {
+      connections.findByIdAndUpdate(id_connection, { status: STATUS_CONNECTION.ACCEPTED }, (err) => {
          if(err)
             res.status(500).send({message: err.message});
          else
