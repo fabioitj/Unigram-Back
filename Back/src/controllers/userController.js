@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import users from "../models/User.js";
 import { generateToken, getUserByToken } from "../routes/auth.js";
+import connections from "../models/Connection.js";
 
 
 class UserController {
@@ -49,17 +50,23 @@ class UserController {
         });
     }
 
-    static get_user_by_id = (req, res) => {
+    static get_user_by_id = async (req, res) => {
         const {id} = req.params;
         
-        users.findById(id, (err, user) => {
-            if(err) {
-                res.status(500).send({message: err});
-            }
-            else {
-                res.status(200).send(user);
-            }
+        const user = await users.findById(id).select('-password');
+        const connectionIds = await connections.find({
+            $or: [
+                { id_user_requester: id },
+                { id_user_requested: id }
+            ]
         });
+
+        const retorno = {
+            ...(user.toObject()),
+            connections: connectionIds
+        };
+
+        res.status(200).send(retorno);
     }
 
     static create_user = (req, res) => {
