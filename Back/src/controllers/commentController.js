@@ -21,7 +21,12 @@ class CommentController {
     static create_comment = (req, res) => {
         const {body} = req;
 
-        const new_comment = new comments(body);
+        const comment = {
+            ...body,
+            date_register: new Date()
+        };
+
+        const new_comment = new comments(comment);
         new_comment.save((err) => {
             if(err) {
                 res.status(500).send({message: err});
