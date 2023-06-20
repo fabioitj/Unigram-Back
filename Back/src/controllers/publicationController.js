@@ -140,7 +140,8 @@ class PublicationController {
 
         const new_publication = new publications({
             ...body,
-            id_user
+            id_user,
+            date_register: new Date()
         });
 
         new_publication.save((err) => {
