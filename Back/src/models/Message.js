@@ -4,8 +4,8 @@ const messageSchema = mongoose.Schema(
     {
         id: {type: String},
         body: {type: String, required: true},
-        sender: {type: mongoose.Schema.Types.ObjectId, required: true},
-        receiver: {type: mongoose.Schema.Types.ObjectId, required: true},
+        sender: {type: mongoose.Schema.Types.ObjectId, required: true, ref: 'users'},
+        receiver: {type: mongoose.Schema.Types.ObjectId, required: true, ref: 'users'},
         date_register: {type: Date, required: true}
     },
     {

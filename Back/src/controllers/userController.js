@@ -63,6 +63,10 @@ class UserController {
     static create_user = (req, res) => {
         const {body} = req;
 
+        const validate_message = validate_signup(body);
+        if(validate_message != "")
+            return res.status(500).send({message: validate_message});
+
         const new_user = new users(body);
         new_user.save((err) => {
             if(err) {
@@ -100,6 +104,27 @@ class UserController {
             }
         })
     }
+}
+
+function validate_signup(data) {
+    const {username, email, password, confirm_password, birth_date} = data;
+    const fields_validate = [];
+
+    if(!username)
+        fields_validate.push('Você precisa preencher o campo Username');
+    
+    if(!email)
+        fields_validate.push('Você precisa preencher o campo E-mail');
+    
+    if(!password)
+        fields_validate.push('Você precisa preencher o campo Password');
+    else if(password != confirm_password)
+            fields_validate.push('A senha e confirmar senha precisam ser idênticas.');
+
+    if(!birth_date)
+        fields_validate.push('Você precisa preencher o campo Birth Date');
+
+    return fields_validate.join(', ');
 }
 
 export default UserController;

@@ -49,8 +49,8 @@ class MessageController {
                 })
                     .sort({ date_register: -1 })
                     .limit(1)
-                    .populate('sender')
-                    .populate('receiver');
+                    .populate('sender', ['_id', 'username'])
+                    .populate('receiver', ['_id', 'username']);
                 
                 if(!lastMessage)
                     return;
@@ -60,8 +60,8 @@ class MessageController {
                     message: {
                     _id: lastMessage?._id,
                     body: lastMessage?.body,
-                    sender: lastMessage?.sender._id,
-                    receiver: lastMessage?.receiver._id,
+                    sender: lastMessage?.sender,
+                    receiver: lastMessage?.receiver,
                     date_register: lastMessage?.date_register
                     }
                 };

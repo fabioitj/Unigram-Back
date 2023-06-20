@@ -52,6 +52,8 @@ class PublicationController {
     static get_publications_by_user = async (req, res) => {
         const { id } = req.params;
 
+        const userId = getUserByToken(req);
+
         const publication_list = await publications
             .aggregate([
                 {
@@ -85,6 +87,9 @@ class PublicationController {
                     if(err) {
                         res.status(500).send({message: err});
                     } else {
+
+                        result = result.map(_ => {return {..._, already_liked: _.likes?.map(l => l._id.toString()).includes(userId)}})
+
                         res.status(200).send(result);
                     }
                 }
