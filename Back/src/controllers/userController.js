@@ -35,10 +35,10 @@ class UserController {
     }
 
     static get_users_by_search = (req, res) => {
-        const { search } = req.body;
+        const username = req.params;
 
         users.find({
-            'name': { $regex: '.*' + search + '.*' }
+            'name': { $regex: '.*' + username + '.*' }
         }, ['_id', 'username', 'name'], (err, users) => {
             if(err)
                 res.status(500).send({message: err});
