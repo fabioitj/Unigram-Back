@@ -73,18 +73,31 @@ class UserController {
 
     static get_user_by_id = async (req, res) => {
         const {id} = req.params;
+
+        const userId = getUserByToken(req);
         
         const user = await users.findById(id).select('-password');
-        const connectionIds = await connections.find({
+        let connectionIds = await connections.find({
             $or: [
                 { id_user_requester: id },
                 { id_user_requested: id }
             ]
         });
 
+        const filteredConnection = connectionIds.filter(connectionId => connectionId.id_user_requester.toString() == userId || connectionId.id_user_requested.toString() == userId);
+        let connection = null;
+
+        if(filteredConnection.length > 0 && id !== userId)
+            connection = {
+                _id: filteredConnection[0]._id,
+                isConnected: filteredConnection[0].status === 'A',
+                isPending: filteredConnection[0].status === 'P',
+            }
+
         const retorno = {
             ...(user.toObject()),
-            connections: connectionIds
+            connections: connectionIds,
+            connection
         };
 
         res.status(200).send(retorno);

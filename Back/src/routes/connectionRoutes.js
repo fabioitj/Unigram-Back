@@ -6,6 +6,7 @@ const router = express.Router();
 
 router
     .get("/connection", checkToken, ConnectionController.get_connections_by_logged_user)
+    .get("/connection/pending", checkToken, ConnectionController.get_pending_connections_by_logged_user)
     .get("/connection/:id", checkToken, ConnectionController.get_connections_by_user)
     .post("/connection/request", checkToken, ConnectionController.request_connection)
     .put("/connection/accept", checkToken, ConnectionController.accept_connection)
