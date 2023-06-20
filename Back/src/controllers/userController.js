@@ -35,19 +35,40 @@ class UserController {
         })
     }
 
-    static get_users_by_search = (req, res) => {
-        const {username} = req.params;
-
-        console.log({username});
-
-        users.find({
-            'name': { $regex: '.*' + username + '.*' }
-        }, ['_id', 'username', 'name'], (err, users) => {
-            if(err)
-                res.status(500).send({message: err});
-            else
-                res.status(200).send(users);
-        });
+    static get_users_by_search = async (req, res) => {
+        const { username } = req.params;
+        const currentUser = getUserByToken(req); // Assuming you have the current user object available
+    
+        try {
+            const blockedConnections = await connections.find({
+                $and: [
+                { $or: [{ id_user_requester: currentUser }, { id_user_requested: currentUser }] },
+                { status: 'B' }
+                ]
+            }).select('id_user_requester id_user_requested');
+        
+            const blockedUserIds = blockedConnections.reduce((ids, connection) => {
+                if (connection.id_user_requester.toString() !== currentUser.toString()) {
+                ids.push(connection.id_user_requester);
+                }
+                if (connection.id_user_requested.toString() !== currentUser.toString()) {
+                ids.push(connection.id_user_requested);
+                }
+                return ids;
+            }, []);
+        
+            const usersFound = await users.find({
+                $and: [
+                { name: { $regex: '.*' + username + '.*' } },
+                { _id: { $nin: blockedUserIds } }
+                ]
+            }, '_id username name');
+        
+            res.status(200).json(usersFound);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: err });
+        }
     }
 
     static get_user_by_id = async (req, res) => {
