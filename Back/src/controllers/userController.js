@@ -35,7 +35,9 @@ class UserController {
     }
 
     static get_users_by_search = (req, res) => {
-        const username = req.params;
+        const {username} = req.params;
+
+        console.log({username});
 
         users.find({
             'name': { $regex: '.*' + username + '.*' }
