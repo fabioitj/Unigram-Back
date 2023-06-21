@@ -103,6 +103,25 @@ class UserController {
         res.status(200).send(retorno);
     }
 
+    static get_user_logged = async (req, res) => {
+        const id = getUserByToken(req);
+        
+        const user = await users.findById(id).select('-password');
+        let connectionIds = await connections.find({
+            $or: [
+                { id_user_requester: id },
+                { id_user_requested: id }
+            ]
+        });
+
+        const retorno = {
+            ...(user.toObject()),
+            connections: connectionIds
+        };
+
+        res.status(200).send(retorno);
+    }
+
     static create_user = (req, res) => {
         const {body} = req;
 
