@@ -84,7 +84,7 @@ class MessageController {
 
     static get_messages = (req, res) => {
 
-        const {receiver} = req.body;
+        const {id} = req.params;
 
         const sender = getUserByToken(req);
 
@@ -92,8 +92,8 @@ class MessageController {
             $and: [
                 {
                    $or: [
-                      { receiver: receiver },
-                      { sender: receiver },
+                      { receiver: id },
+                      { sender: id },
                    ],
                 },
                 { 

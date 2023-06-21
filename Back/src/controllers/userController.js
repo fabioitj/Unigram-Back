@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import users from "../models/User.js";
 import { generateToken, getUserByToken } from "../routes/auth.js";
 import connections from "../models/Connection.js";
+import publications from "../models/Publication.js";
 
 
 class UserController {
@@ -105,6 +106,8 @@ class UserController {
 
     static get_user_logged = async (req, res) => {
         const id = getUserByToken(req);
+
+        
         
         const user = await users.findById(id).select('-password');
         let connectionIds = await connections.find({
@@ -113,6 +116,10 @@ class UserController {
                 { id_user_requested: id }
             ]
         });
+
+        const publicationsUser = await publications.find({ id_user: id });
+
+        console.log({publicationsUser});
 
         const retorno = {
             ...(user.toObject()),
