@@ -14,7 +14,7 @@ class UserController {
             password: body.password
         }, (err, user) => {
             if(err || !user) {
-                res.status(500).send({message: "Suas credenciais estão incorretas."});
+                res.status(401).send({message: "Suas credenciais estão incorretas."});
             }
             else {
                 const token = generateToken(user._id);
