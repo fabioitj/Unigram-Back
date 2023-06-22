@@ -116,8 +116,11 @@ class MessageController {
         
         const sender = getUserByToken(req);
 
+        const {receiver, body} = req.body;
+
         const newMessage = new messages({
-            ...req.body,
+            body: body.body,
+            receiver: body.receiver,
             sender,
             date_register: new Date()
         })
