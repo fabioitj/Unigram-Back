@@ -92,7 +92,7 @@ class UserController {
             connection = {
                 _id: filteredConnection[0]._id,
                 isConnected: filteredConnection[0].status === 'A',
-                isPending: filteredConnection[0].status === 'P',
+                isPending: filteredConnection[0].status === 'R',
             }
 
         const retorno = {
