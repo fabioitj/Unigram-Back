@@ -40,12 +40,7 @@ class ConnectionController {
 
       connections.find({
          $and: [
-            {
-               $or: [
-                  { id_user_requester: id },
-                  { id_user_requested: id },
-               ],
-            },
+            { id_user_requested: id },
             { status: 'R' }
          ]
       })
