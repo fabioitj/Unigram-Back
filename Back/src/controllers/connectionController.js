@@ -46,7 +46,7 @@ class ConnectionController {
                   { id_user_requested: id },
                ],
             },
-            { status: 'P' }
+            { status: 'R' }
          ]
       })
       .populate('id_user_requester',)
