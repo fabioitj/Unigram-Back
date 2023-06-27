@@ -8,7 +8,7 @@ const userSchema = mongoose.Schema(
         email: {type: String, required: true},
         birth_date: {type: String, required: true},
         password: {type: String, required: true},
-        follows: [{type: mongoose.Schema.Types.ObjectId, ref: 'users'}]
+        connections: [{type: mongoose.Schema.Types.ObjectId, ref: 'connections'}]
     },
     {
         versionKey: false
